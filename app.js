@@ -197,25 +197,21 @@ function updateRunwayPanel(runway, windDir, windSpeed) {
     const panel = document.getElementById("runway-panel");
     if (!panel) return;
 
-    if (runway === "UNKNOWN") {
+    if (runway === "UNKNOWN" || !windDir || !windSpeed) {
         panel.className = "runway-unknown";
-        panel.innerText = "Piste active : inconnue";
+        panel.innerText = "Piste inconnue";
         return;
     }
 
-    const info = computeCrosswind(runway, windDir, windSpeed);
     const r = RUNWAYS[runway];
+    const info = computeCrosswind(windDir, windSpeed, r.heading);
 
     panel.className = runway === "22" ? "runway-22" : "runway-04";
 
-    if (!info) {
-        panel.innerText = `Piste ${runway} (${r.heading}°) – vent: données insuffisantes`;
-        return;
-    }
-
     panel.innerText =
-        `Piste ${runway} (${r.heading}°) – vent ${windDir}°/${windSpeed} kt – ` +
-        `crosswind ≈ ${info.crosswind} kt (Δ${info.angleDiff}°)`;
+        `Piste ${runway} (${r.heading}°) – ` +
+        `${info.crosswind} kt crosswind (Δ${info.angleDiff}°) – ` +
+        `Vent ${windDir}°/${windSpeed} kt`;
 }
 
 // ======================================================
@@ -257,7 +253,7 @@ function updateSonometers(runway) {
     });
 }
 function updateSonometersAdvanced(runway, phase) {
-    // Reset all to gray
+    // Tout en gris par défaut
     Object.values(sonometers).forEach(s => {
         s.marker.setStyle({ color: "gray", fillColor: "gray" });
     });
@@ -270,7 +266,7 @@ function updateSonometersAdvanced(runway, phase) {
     if (runway === "22") {
         if (phase === "takeoff") {
             green = ["F002","F003","F004","F005","F006","F007","F008","F009","F010","F011","F012","F013","F016"];
-        } else if (phase === "landing") {
+        } else {
             green = ["F001","F014","F015","F017"];
         }
     }
@@ -279,13 +275,12 @@ function updateSonometersAdvanced(runway, phase) {
         if (phase === "takeoff") {
             green = ["F002","F003","F007","F008","F009","F011","F013"];
             red   = ["F004","F005","F006","F010","F012","F016"];
-        } else if (phase === "landing") {
+        } else {
             green = ["F014","F015"];
             red   = ["F001","F017"];
         }
     }
 
-    // Apply colors
     green.forEach(id => {
         if (sonometers[id]) {
             sonometers[id].marker.setStyle({ color: "green", fillColor: "green" });
@@ -298,6 +293,7 @@ function updateSonometersAdvanced(runway, phase) {
         }
     });
 }
+
 
 // ======================================================
 // METAR

@@ -300,12 +300,15 @@ function initSonometers(mapInstance) {
 
         marker.bindTooltip(s.id, { permanent: false });
 
-        marker.on("click", () => {
-            marker.bindPopup(`
-                <b>${s.id}</b><br>
-                Adresse : ${address}
-            `).openPopup();
-        });
+      marker.on("click", () => {
+    marker.bindPopup(`
+        <b>${s.id}</b><br>
+        Adresse : ${address}
+    `).openPopup();
+
+    highlightSonometerInList(s.id);
+});
+
 
         sonometers[s.id] = {
             ...s,
@@ -377,6 +380,25 @@ function updateSonometerPanel() {
     }).join("");
 
     updateSonoChart(green.length, red.length, gray.length);
+}
+
+function highlightSonometerInList(id) {
+    const list = document.getElementById("sono-list");
+    if (!list) return;
+
+    // Retirer l'ancien highlight
+    list.querySelectorAll(".sono-item").forEach(el =>
+        el.classList.remove("sono-highlight")
+    );
+
+    // Ajouter le highlight au bon élément
+    const item = [...list.children].find(el => el.textContent.trim() === id);
+    if (item) {
+        item.classList.add("sono-highlight");
+
+        // Scroll automatique vers l’élément
+        item.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
 }
 
 function updateSonoChart(g, r, y) {
